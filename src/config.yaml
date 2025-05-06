@@ -1,0 +1,22 @@
+receivers:
+ otlp:
+   protocols:
+     grpc:
+       endpoint: "localhost:4317"
+     http:
+       endpoint: "localhost:4318"
+
+exporters:
+  otlphttp/grafana:
+    endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT}
+
+    headers:
+      Authorization: ${OTEL_EXPORTER_OTLP_HEADERS}
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [otlphttp/grafana]
+    metrics:
+      receivers: [otlp]
+      exporters: [otlphttp/grafana]

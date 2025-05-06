@@ -1,0 +1,47 @@
+## Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+## SPDX-License-Identifier: MIT-0
+
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Lambda Performance Optimization
+
+Parameters:
+  GrafanaOtlpHeader:
+    Type: String
+    Default: grafana_cloud_otel
+  GrafanaOtlpWrapper:
+    Type: String
+    Default: /opt/otel-instrument
+  GrafaneConfFile:
+    Type: String
+    Default: /var/task/config.yaml
+  GrafanaOtlpEndpoint:
+    Type: String
+    Default: https://otlp-gateway-prod-eu-west-2.grafana.net/otlp
+  GrafanaOtlpProtocol:
+    Type: String
+    Default: http/protobuf
+  GrafanaOtlpAttribute:
+    Type: String
+    Default: deployment.environment=production
+
+Resources:                
+  armFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: app.lambda_handler
+      Runtime: python3.10
+      Architectures: [arm64]
+      Tracing: Active
+      Layers:
+        - arn:aws:lambda:eu-central-1:901920570463:layer:aws-otel-python-arm64-ver-1-25-0:1
+      Environment:
+        Variables:
+          OTEL_EXPORTER_OTLP_HEADERS: !Ref GrafanaOtlpHeader
+          AWS_LAMBDA_EXEC_WRAPPER: !Ref GrafanaOtlpWrapper
+          OTEL_INSTRUMENTATION: !Ref GrafaneConfFile
+          OTEL_EXPORTER_OTLP_ENDPOINT: !Ref GrafanaOtlpEndpoint
+          OTEL_EXPORTER_OTLP_PROTOCOL: !Ref GrafanaOtlpProtocol
+          OTEL_RESOURCE_ATTRIBUTES: !Ref GrafanaOtlpAttribute
+
