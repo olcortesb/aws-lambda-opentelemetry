@@ -36,6 +36,9 @@ Resources:
       Tracing: Active
       Layers:
         - arn:aws:lambda:eu-central-1:901920570463:layer:aws-otel-python-arm64-ver-1-25-0:1
+      AutoPublishAlias: live
+      ProvisionedConcurrencyConfig:
+        ProvisionedConcurrentExecutions: 13
       Environment:
         Variables:
           OTEL_EXPORTER_OTLP_HEADERS: !Ref GrafanaOtlpHeader
@@ -45,3 +48,24 @@ Resources:
           OTEL_EXPORTER_OTLP_PROTOCOL: !Ref GrafanaOtlpProtocol
           OTEL_RESOURCE_ATTRIBUTES: !Ref GrafanaOtlpAttribute
 
+  x86Function:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: app.lambda_handler
+      Runtime: python3.10
+      Architectures: [x86_64]
+      Tracing: Active
+      Layers:
+        - arn:aws:lambda:eu-central-1:901920570463:layer:aws-otel-python-amd64-ver-1-25-0:1
+      AutoPublishAlias: live
+      ProvisionedConcurrencyConfig:
+        ProvisionedConcurrentExecutions: 13
+      Environment:
+        Variables:
+          OTEL_EXPORTER_OTLP_HEADERS: !Ref GrafanaOtlpHeader
+          AWS_LAMBDA_EXEC_WRAPPER: !Ref GrafanaOtlpWrapper
+          OTEL_INSTRUMENTATION: !Ref GrafaneConfFile
+          OTEL_EXPORTER_OTLP_ENDPOINT: !Ref GrafanaOtlpEndpoint
+          OTEL_EXPORTER_OTLP_PROTOCOL: !Ref GrafanaOtlpProtocol
+          OTEL_RESOURCE_ATTRIBUTES: !Ref GrafanaOtlpAttribute
